@@ -1,6 +1,6 @@
 import pandas as pd
 from pandas_datareader import data as pdr
-from datetime import datetime as date
+from datetime import datetime as date, timedelta
 import dash
 from dash import dcc, html
 from dash.dependencies import Input, Output, State
@@ -8,28 +8,34 @@ import plotly.graph_objs as go
 import plotly.express as px
 import yfinance as yf
 from dash.exceptions import PreventUpdate
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.svm import SVR
 from model import predict
 
-app = dash.Dash()
-
+#stock price figure
 def get_stock_price_fig(df):
     fig = px.line(df, x="Date", y=["Close", "Open"], title="Closing and Opening Price vs Date", markers=True)
     fig.update_layout(title_x=0.5)
     return fig
 
+#exponential moving average figure
 def get_more(df):
     df['EWA_20'] = df['Close'].ewm(span=20, adjust=False).mean()
     fig = px.scatter(df, x="Date", y="EWA_20", title="Exponential Moving Average vs Date")
     fig.update_traces(mode="lines+markers")
     return fig
 
+#candlestick figure
 def get_candlestick_fig(df):
-    fig = go.Figure(data=[go.Candlestick(x=df['Date'],
-                                         open=df['Open'], high=df['High'],
-                                         low=df['Low'], close=df['Close'])])
+    fig = go.Figure(data=[go.Candlestick(x=df['Date'], open=df['Open'], high=df['High'], low=df['Low'], close=df['Close'])])
     fig.update_layout(title='Candlestick Chart', xaxis_rangeslider_visible=False)
     return fig
 
+
+#App Initialisation
+app = dash.Dash(__name__)
+
+#App Layout
 app.layout = html.Div([
     html.Div([
         html.Div([
@@ -49,9 +55,8 @@ app.layout = html.Div([
                 max_date_allowed=date.today(),
                 initial_visible_month=date.today(),
                 end_date=date.today().date(),
-                style={'font-size': '18px', 'display': 'inline-block', 'margin-left': '10px'}
-            ),
-            html.Div(id='output-container-date-picker-range', children='You have selected a date')
+                style={'font-size': '16px', 'display': 'inline-block'}
+            )
         ]),
 
         html.Div([
@@ -84,6 +89,7 @@ app.layout = html.Div([
 
 ], className="container")
 
+#App Callbacks
 @app.callback([
     Output('description', 'children'),
     Output('name', 'children'),
@@ -93,10 +99,7 @@ app.layout = html.Div([
     [Input('submit-name', 'n_clicks')],
     [State('input', 'value')])
 def update_data(n, val):
-    if n is None:
-        raise PreventUpdate
-
-    if val is None or val.strip() == "":
+    if n is None or val is None or val.strip() == "":
         raise PreventUpdate
 
     try:
@@ -115,16 +118,10 @@ def update_data(n, val):
                State('my-date-picker-range', 'end_date'),
                State('input', 'value')])
 def update_stock_price_graph(n, start_date, end_date, val):
-    if n is None:
-        return [""]
-    if val is None:
+    if n is None or val is None:
         raise PreventUpdate
 
-    if start_date is not None:
-        df = yf.download(val, str(start_date), str(end_date))
-    else:
-        df = yf.download(val)
-
+    df = yf.download(val, str(start_date), str(end_date)) if start_date else yf.download(val)
     df.reset_index(inplace=True)
     fig = get_stock_price_fig(df)
     return [dcc.Graph(figure=fig)]
@@ -135,16 +132,10 @@ def update_stock_price_graph(n, start_date, end_date, val):
                State('my-date-picker-range', 'end_date'),
                State('input', 'value')])
 def update_candlestick_graph(n, start_date, end_date, val):
-    if n is None:
-        return [""]
-    if val is None:
+    if n is None or val is None:
         raise PreventUpdate
 
-    if start_date is not None:
-        df = yf.download(val, str(start_date), str(end_date))
-    else:
-        df = yf.download(val)
-
+    df = yf.download(val, str(start_date), str(end_date)) if start_date else yf.download(val)
     df.reset_index(inplace=True)
     fig = get_candlestick_fig(df)
     return [dcc.Graph(figure=fig)]
@@ -155,16 +146,10 @@ def update_candlestick_graph(n, start_date, end_date, val):
                State("my-date-picker-range", "end_date"),
                State("input", "value")])
 def indicators(n, start_date, end_date, val):
-    if n is None:
-        return [""]
-    if val is None:
+    if n is None or val is None:
         return [""]
 
-    if start_date is None:
-        df_more = yf.download(val)
-    else:
-        df_more = yf.download(val, str(start_date), str(end_date))
-
+    df_more = yf.download(val, str(start_date), str(end_date)) if start_date else yf.download(val)
     df_more.reset_index(inplace=True)
     fig = get_more(df_more)
     return [dcc.Graph(figure=fig)]
@@ -173,10 +158,8 @@ def indicators(n, start_date, end_date, val):
               [Input('submit-more', 'n_clicks')],
               [State('input', 'value')])
 def update_more_info(n, val):
-    if n is None:
+    if n is None or val is None:
         return ""
-    if val is None:
-        raise PreventUpdate
 
     try:
         ticker = yf.Ticker(val)
@@ -186,7 +169,7 @@ def update_more_info(n, val):
         market_cap = inf.get('marketCap', "N/A")
         pe_ratio = inf.get('trailingPE', "N/A")
         peg_ratio = inf.get('pegRatio', "N/A")
-        
+
         more_info = html.Div([
             html.H3("More Information"),
             html.P(f"Sector: {sector}"),
@@ -197,7 +180,7 @@ def update_more_info(n, val):
         ])
     except Exception as e:
         more_info = f"Error fetching more information: {str(e)}"
-    
+
     return more_info
 
 @app.callback(
@@ -206,13 +189,18 @@ def update_more_info(n, val):
     [State("Forcast_Input", "value"),
      State("input", "value")]
 )
-def forecast(n, n_days, val):
-    if n is None:
+def forecast(n, days, val):
+    if n is None or val is None or days is None:
         return [""]
-    if val is None:
-        raise PreventUpdate
-    fig = predict(val, int(n_days) + 1)
+
+    try:
+        days = int(days)
+    except ValueError:
+        return ["Please enter a valid number of days for forecasting."]
+
+    fig = predict(val, days)
     return [dcc.Graph(figure=fig)]
 
+#Run
 if __name__ == '__main__':
     app.run_server(debug=True)
