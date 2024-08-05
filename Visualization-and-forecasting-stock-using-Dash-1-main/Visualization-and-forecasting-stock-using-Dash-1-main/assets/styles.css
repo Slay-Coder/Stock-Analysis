@@ -1,0 +1,129 @@
+.container {
+    font-family: Arial, sans-serif;
+    margin: 0 auto;
+    padding: 20px;
+    max-width: 1200px;
+    background-color: #f7f9fc;
+}
+
+.nav {
+    background-color: #333;
+    padding: 20px;
+    color: white;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.nav .start {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.nav .start h1 {
+    color: #fff;
+    margin-bottom: 10px;
+    font-family: inherit;
+}
+
+.nav div {
+    margin: 10px 0;
+}
+
+.nav input[type="text"],
+.nav input[type="number"] {
+    padding: 10px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 4px;
+}
+
+.nav button {
+    padding: 10px 20px;
+    background-color: #337bb5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.nav button:hover {
+    background-color: #879087;
+}
+
+.header {
+    text-align: center;
+    margin: 20px 0;
+}
+
+.header img {
+    max-width: 100px;
+    margin-bottom: 10px;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    color: #333;
+}
+
+.description_ticker {
+    text-align: justify;
+    margin-bottom: 20px;
+    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    border: #333;
+    padding: 10px;
+}
+
+#stock-price-graph,
+#candlestick-graph,
+#main-content,
+#more-info,
+#forecast-content {
+    margin: 20px 0;
+}
+
+#my-date-picker-range{
+    width: 350px;
+}
+
+.dash-datepicker{
+    background-color: #0056b3;
+}
+
+#more-info h3 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#more-info p {
+    font-size: 1.1em;
+    color: #666;
+}
+
+.dash-datepicker end-date{
+    margin-right: 5px;
+    align-items: inline;
+}
+
+button, input[type="text"], input[type="number"], .dash-datepicker input {
+    padding: 10px;
+    margin: 10px 5px;
+    margin-right: 5px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    font-size: 1em;
+}
+
+button {
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #596674;
+}
+
+button:focus, input[type="text"]:focus, input[type="number"]:focus, .dash-datepicker input:focus {
+    outline: none;
+    border: 1px solid #007bff;
+}
