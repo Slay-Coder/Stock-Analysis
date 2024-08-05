@@ -1,4 +1,5 @@
 # Stock-Analysis
+This project provides comprehensive stock analysis through interactive charts, including candlestick charts, to visualize trends over user-specified date ranges. It tracks previous opening and closing rates and offers predictive insights into future stock behavior, empowering users to make informed investment decisions.
 ![Screenshot 2024-08-05 213306](https://github.com/user-attachments/assets/78e2af23-9d94-49e2-b2d3-92c58f006e14)
 ![Screenshot 2024-08-05 213609](https://github.com/user-attachments/assets/fa483ed9-5674-4746-8589-a48c89770405)
 ![Screenshot 2024-08-05 213634](https://github.com/user-attachments/assets/3d42b87f-9407-4f4b-98f5-81b65be8c2f6)
